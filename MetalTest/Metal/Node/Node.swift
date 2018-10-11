@@ -49,6 +49,7 @@ class Node {
     }
     
     func render(commandBuffer: MTLCommandBuffer, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: float4x4, projectionMatrix: float4x4, renderEncoder: MTLRenderCommandEncoder ) {
+        
         renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
         renderEncoder.setFragmentTexture(texture, index: 0)
         if let samplerState = samplerState {

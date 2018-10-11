@@ -22,7 +22,7 @@ class RenderManager {
     
     static func build(view:MTKView, device: MTLDevice, commandQueue: MTLCommandQueue) -> RenderManager? {
         guard let pipelineState = createPipelineState(view: view, device: device) else { return nil }
-        guard let depthTexture = createDepthTextureFromMTKView(view, on: device) else { return nil }
+        guard let depthTexture = createDepthTextureFromMTKView(view.drawableSize, on: device) else { return nil }
         guard let depthStencilState = createDepthStencilStateOnDevice(device) else { return nil }
         let worldModelMatrix = createWorldMatrixModel()
         let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 2 + Light.size()
@@ -45,9 +45,8 @@ class RenderManager {
         }
     }
     
-    static private func createDepthTextureFromMTKView(_ view: MTKView, on device: MTLDevice) -> MTLTexture? {
-        let size = view.drawableSize
-        let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth32Float_stencil8, width: Int(size.width), height: Int(size.height), mipmapped: false)
+    static private func createDepthTextureFromMTKView(_ drawableSize: CGSize, on device: MTLDevice) -> MTLTexture? {
+        let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth32Float_stencil8, width: Int(drawableSize.width), height: Int(drawableSize.height), mipmapped: false)
         desc.storageMode = .private
         desc.usage = .renderTarget
         let depthTexture = device.makeTexture(descriptor: desc)
@@ -83,8 +82,8 @@ class RenderManager {
         self.worldModelMatrix = worldModelMatrix
     }
     
-    func refreshDepthTexture(view: MTKView, device: MTLDevice) {
-        depthTexture = RenderManager.createDepthTextureFromMTKView(view, on: device) ?? depthTexture
+    func refreshDepthTexture(drawableSize: CGSize, device: MTLDevice) {
+        depthTexture = RenderManager.createDepthTextureFromMTKView(drawableSize, on: device) ?? depthTexture
     }
     
     func runMovementBlock() {
@@ -98,6 +97,7 @@ class RenderManager {
     }
     
     func render(drawable: CAMetalDrawable, projectionMatrix: float4x4) {
+        
         guard let commandBuffer = commandQueue.makeCommandBuffer() else {
             return
         }
@@ -112,7 +112,7 @@ class RenderManager {
         renderPassDescriptor.colorAttachments[0].clearColor = MTLClearColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0)
         renderPassDescriptor.depthAttachment.texture = depthTexture
         renderPassDescriptor.depthAttachment.clearDepth = 1.0
-        renderPassDescriptor.depthAttachment.storeAction = .dontCare
+        renderPassDescriptor.depthAttachment.storeAction = .store
         renderPassDescriptor.depthAttachment.loadAction = .clear
         
         

@@ -13,13 +13,12 @@ class ViewController: UIViewController {
     
     var metalManager: MetalManager?
     
+    @IBOutlet var mtkView: MTKView!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        guard let view = view as? MTKView else {
-            return
-        }
-        metalManager = MetalManager.buildMetalManager(view: view)
+        metalManager = MetalManager.buildMetalManager(view: mtkView)
         metalManager?.createNode()
         
     }
