@@ -20,13 +20,11 @@ class RenderManager {
     private var nodeArray = [Node]()
     private var worldModelMatrix = float4x4()
     
-    static func build(view:MTKView, device: MTLDevice, commandQueue: MTLCommandQueue, bufferProvider: BufferProvider) -> RenderManager? {
+    static func build(view:MTKView, device: MTLDevice, commandQueue: MTLCommandQueue) -> RenderManager? {
         guard let pipelineState = createPipelineState(view: view, device: device) else { return nil }
         guard let depthTexture = createDepthTextureFromMTKView(view, on: device) else { return nil }
         guard let depthStencilState = createDepthStencilStateOnDevice(device) else { return nil }
-        var worldModelMatrix = float4x4()
-        worldModelMatrix.translate(0.0, y: 0.0, z: -7.0)
-        worldModelMatrix.rotateAroundX(float4x4.degrees(toRad: 45), y: 0.0, z: 0.0)
+        let worldModelMatrix = createWorldMatrixModel()
         let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 2 + Light.size()
         let bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeOfUniformsBuffer)
         return RenderManager(commandQueue: commandQueue, bufferProvider: bufferProvider, pipelineState: pipelineState, depthTexture: depthTexture, depthStencilState: depthStencilState, worldModelMatrix: worldModelMatrix)
@@ -46,6 +44,7 @@ class RenderManager {
             return nil
         }
     }
+    
     static private func createDepthTextureFromMTKView(_ view: MTKView, on device: MTLDevice) -> MTLTexture? {
         let size = view.drawableSize
         let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth32Float_stencil8, width: Int(size.width), height: Int(size.height), mipmapped: false)
@@ -63,6 +62,13 @@ class RenderManager {
         return device.makeDepthStencilState(descriptor: depthStencilDescriptor)
     }
     
+    static func createWorldMatrixModel() -> float4x4 {
+        var worldModelMatrix = float4x4()
+        worldModelMatrix.translate(0.0, y: 0.0, z: -7.0)
+        worldModelMatrix.rotateAroundX(float4x4.degrees(toRad: 45), y: 0.0, z: 0.0)
+        return worldModelMatrix
+    }
+    
     private init(commandQueue: MTLCommandQueue,
          bufferProvider: BufferProvider,
          pipelineState: MTLRenderPipelineState,
@@ -75,11 +81,24 @@ class RenderManager {
         self.depthTexture = depthTexture
         self.depthStencilState = depthStencilState
         self.worldModelMatrix = worldModelMatrix
-        
     }
     
-    func render(drawable: CAMetalDrawable?, projectionMatrix: float4x4, worldModelMatrix: float4x4) {
-        guard let drawable = drawable, let commandBuffer = commandQueue.makeCommandBuffer() else {
+    func refreshDepthTexture(view: MTKView, device: MTLDevice) {
+        depthTexture = RenderManager.createDepthTextureFromMTKView(view, on: device) ?? depthTexture
+    }
+    
+    func runMovementBlock() {
+        nodeArray.forEach { (node) in
+            node.movement?()
+        }
+    }
+    
+    func addNode(_ node: Node) {
+        nodeArray.append(node)
+    }
+    
+    func render(drawable: CAMetalDrawable, projectionMatrix: float4x4) {
+        guard let commandBuffer = commandQueue.makeCommandBuffer() else {
             return
         }
         
