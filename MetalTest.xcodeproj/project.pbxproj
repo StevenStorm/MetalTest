@@ -22,6 +22,7 @@
 		CC91A0B521512B340091874D /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B421512B340091874D /* Node.swift */; };
 		CC91A0B821512E5D0091874D /* Triangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B721512E5D0091874D /* Triangle.swift */; };
 		CC91A0BA215134980091874D /* Cube.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B9215134980091874D /* Cube.swift */; };
+		CCB6ED55216F406B00057A00 /* RenderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB6ED54216F406B00057A00 /* RenderManager.swift */; };
 		CCD3C3D521523ECD00206BB0 /* BufferProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD3C3D421523ECD00206BB0 /* BufferProvider.swift */; };
 /* End PBXBuildFile section */
 
@@ -43,6 +44,7 @@
 		CC91A0B421512B340091874D /* Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
 		CC91A0B721512E5D0091874D /* Triangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Triangle.swift; sourceTree = "<group>"; };
 		CC91A0B9215134980091874D /* Cube.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cube.swift; sourceTree = "<group>"; };
+		CCB6ED54216F406B00057A00 /* RenderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderManager.swift; sourceTree = "<group>"; };
 		CCD3C3D421523ECD00206BB0 /* BufferProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BufferProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,6 +80,7 @@
 			children = (
 				CC91A0AD21510FEA0091874D /* MetalManager.swift */,
 				CCD3C3D421523ECD00206BB0 /* BufferProvider.swift */,
+				CCB6ED54216F406B00057A00 /* RenderManager.swift */,
 			);
 			path = Manager;
 			sourceTree = "<group>";
@@ -232,6 +235,7 @@
 				CCD3C3D521523ECD00206BB0 /* BufferProvider.swift in Sources */,
 				CC8E06E02153819C0078FFC6 /* Light.swift in Sources */,
 				CC28233E216E59D7000D841D /* Matrix.swift in Sources */,
+				CCB6ED55216F406B00057A00 /* RenderManager.swift in Sources */,
 				CC91A0B521512B340091874D /* Node.swift in Sources */,
 				CC8E06E3215382D50078FFC6 /* Vertex.swift in Sources */,
 				CC91A0BA215134980091874D /* Cube.swift in Sources */,

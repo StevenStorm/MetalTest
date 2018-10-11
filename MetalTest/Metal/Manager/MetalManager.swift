@@ -13,10 +13,9 @@ import simd
 class MetalManager: NSObject {
     
     private var device: MTLDevice
-    private var pipelineState: MTLRenderPipelineState!
-    private var defaultLibrary: MTLLibrary?
+    private var pipelineState: MTLRenderPipelineState
     private let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
-    private var commandQueue: MTLCommandQueue?
+    private var commandQueue: MTLCommandQueue
     private var projectionMatrix = float4x4()
     private var worldModelMatrix = float4x4()
     
@@ -24,8 +23,8 @@ class MetalManager: NSObject {
     private var lastPanLocation: CGPoint!
     
     private var bufferProvider: BufferProvider
-    private var depthStencilState: MTLDepthStencilState?
-    private var depthTexture: MTLTexture?
+    private var depthStencilState: MTLDepthStencilState
+    private var depthTexture: MTLTexture
     private var nodeArray = [Node]()
     
     private var panGestX: Float = 0.0
@@ -33,50 +32,109 @@ class MetalManager: NSObject {
     private var panGestXDelta: Float = 0.0
     private var panGestYDelta: Float = 0.0
     
-    private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.1, direction: (0.0, 0.0, 1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
+    private var renderManager: RenderManager?
     
-    weak var view: MTKView? {
-        didSet {
-            view?.delegate = self
-            view?.preferredFramesPerSecond = 60
-            view?.clearColor = MTLClearColorMake(1.0, 0.0, 0.0, 1.0)
-            view?.device = device
-            view?.depthStencilPixelFormat = .depth32Float_stencil8
-            setupProjectionMatrix()
-            guard let size = view?.drawableSize else { return }
-            let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth32Float_stencil8, width: Int(size.width), height: Int(size.height), mipmapped: false)
-            desc.storageMode = .private
-            desc.usage = .renderTarget
-            depthTexture = device.makeTexture(descriptor: desc)
-            depthTexture?.label = "DepthStencil"
-        }
-    }
+    private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.1, direction: (0.0, 0.0, 1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
     
     private var textureLoader: MTKTextureLoader
     
-    init(device: MTLDevice) {
-        self.device = device
-        self.textureLoader = MTKTextureLoader(device: device)
-        defaultLibrary = device.makeDefaultLibrary()
+    weak var view: MTKView! {
+        didSet {
+            setView()
+        }
+    }
+    
+    static func buildMetalManager(view:MTKView) -> MetalManager? {
+        view.depthStencilPixelFormat = .depth32Float_stencil8
+        guard let device = MTLCreateSystemDefaultDevice() else { return nil }
+        guard let commandQueue = device.makeCommandQueue() else { return nil }
+        var worldModelMatrix = float4x4()
         worldModelMatrix.translate(0.0, y: 0.0, z: -7.0)
         worldModelMatrix.rotateAroundX(float4x4.degrees(toRad: 45), y: 0.0, z: 0.0)
         let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 2 + Light.size()
-        bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeOfUniformsBuffer)
+        let bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeOfUniformsBuffer)
+        guard let pipelineState = createPipelineState(view: view, device: device) else { return nil }
+        guard let depthTexture = createDepthTextureFromMTKView(view, on: device) else { return nil }
+        guard let depthStencilState = createDepthStencilStateOnDevice(device) else { return nil }
+        return MetalManager(device: device,
+                                        commandQueue: commandQueue,
+                                        pipelineState: pipelineState,
+                                        depthStencilState: depthStencilState,
+                                        depthTexture: depthTexture,
+                                        bufferProvider: bufferProvider,
+                                        worldModelMatrix: worldModelMatrix,
+                                        view: view)
+    }
+    
+    static private func createPipelineState(view:MTKView, device: MTLDevice) -> MTLRenderPipelineState? {
+        guard let defaultLibrary = device.makeDefaultLibrary() else { return nil }
+        let pipelineStateDescriptor = MTLRenderPipelineDescriptor()
+        pipelineStateDescriptor.fragmentFunction = defaultLibrary.makeFunction(name: "basic_fragment")
+        pipelineStateDescriptor.vertexFunction = defaultLibrary.makeFunction(name: "basic_vertex")
+        pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
+        pipelineStateDescriptor.depthAttachmentPixelFormat = view.depthStencilPixelFormat
+        do {
+            return try device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
+        } catch {
+            print("Can't make renderPipelineState object")
+            return nil
+        }
+    }
+    
+    static private func createDepthTextureFromMTKView(_ view: MTKView, on device: MTLDevice) -> MTLTexture? {
+        let size = view.drawableSize
+        let desc = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: .depth32Float_stencil8, width: Int(size.width), height: Int(size.height), mipmapped: false)
+        desc.storageMode = .private
+        desc.usage = .renderTarget
+        let depthTexture = device.makeTexture(descriptor: desc)
+        depthTexture?.label = "DepthStencil"
+        return depthTexture
+    }
+    
+    static private func createDepthStencilStateOnDevice(_ device: MTLDevice) -> MTLDepthStencilState? {
+        let depthStencilDescriptor = MTLDepthStencilDescriptor()
+        depthStencilDescriptor.depthCompareFunction = MTLCompareFunction.less
+        depthStencilDescriptor.isDepthWriteEnabled = true
+        return device.makeDepthStencilState(descriptor: depthStencilDescriptor)
+    }
+    
+    init(device: MTLDevice,
+         commandQueue: MTLCommandQueue,
+         pipelineState: MTLRenderPipelineState,
+         depthStencilState: MTLDepthStencilState,
+         depthTexture: MTLTexture,
+         bufferProvider: BufferProvider,
+         worldModelMatrix: float4x4,
+         view: MTKView) {
         
+        self.device = device
+        self.commandQueue = commandQueue
+        self.pipelineState = pipelineState
+        self.depthStencilState = depthStencilState
+        self.depthTexture = depthTexture
+        self.bufferProvider = bufferProvider
+        self.worldModelMatrix = worldModelMatrix
+        self.textureLoader = MTKTextureLoader(device: device)
+        self.view = view
         super.init()
-        
-        setupDepthStencilState()
+        self.setView()
+    }
+    
+    private func setView() {
+        view.delegate = self
+        view.preferredFramesPerSecond = 60
+        view.clearColor = MTLClearColorMake(1.0, 0.0, 0.0, 1.0)
+        view.device = device
+        view.depthStencilPixelFormat = .depth32Float_stencil8
+        setupProjectionMatrix()
+        depthTexture = MetalManager.createDepthTextureFromMTKView(view, on: device) ?? depthTexture
     }
     
     private func setupProjectionMatrix() {
-        guard let view = self.view else { return }
         projectionMatrix = float4x4.makePerspectiveViewAngle(float4x4.degrees(toRad: 85), aspectRatio: Float(view.bounds.width/view.bounds.height), nearZ: 0.01, farZ: 100.0)
     }
     
     func createNode() {
-        guard let commandQueue = commandQueue else {
-            return
-        }
 //        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
 //        rotationCube.translate(xDelta: 0.0, yDelta: 0.0, zDelta: -4.0)
 ////        rotationCube.movement = { [unowned self] in
@@ -99,41 +157,8 @@ class MetalManager: NSObject {
         setupGesture()
     }
     
-    private func loadFragmentProgram(programName: String) {
-        pipelineStateDescriptor.fragmentFunction = defaultLibrary?.makeFunction(name: programName)
-    }
-    
-    private func loadVertexProgram(programName: String) {
-        pipelineStateDescriptor.vertexFunction = defaultLibrary?.makeFunction(name: programName)
-    }
-    
-    func createRenderPipeLine() {
-        loadFragmentProgram(programName: "basic_fragment")
-        loadVertexProgram(programName: "basic_vertex")
-        pipelineStateDescriptor.colorAttachments[0].pixelFormat = .bgra8Unorm
-        if let view = self.view {
-            pipelineStateDescriptor.depthAttachmentPixelFormat = view.depthStencilPixelFormat
-        }
-        do {
-            pipelineState = try device.makeRenderPipelineState(descriptor: pipelineStateDescriptor)
-        } catch {
-            print("Can't make renderPipelineState object")
-        }
-    }
-    
-    private func setupDepthStencilState() {
-        let depthStencilDescriptor = MTLDepthStencilDescriptor()
-        depthStencilDescriptor.depthCompareFunction = MTLCompareFunction.less
-        depthStencilDescriptor.isDepthWriteEnabled = true
-        depthStencilState = self.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
-    }
-    
-    func createCommandQueue() {
-        commandQueue = device.makeCommandQueue()
-    }
-    
-    func render(drawable: CAMetalDrawable?) {
-        guard let drawable = drawable, let commandBuffer = self.commandQueue?.makeCommandBuffer() else {
+    func render(drawable: CAMetalDrawable) {
+        guard let commandBuffer = self.commandQueue.makeCommandBuffer() else {
             return
         }
         
@@ -171,13 +196,10 @@ class MetalManager: NSObject {
     
     private func setupGesture() {
         let pan = UIPanGestureRecognizer(target: self, action: #selector(MetalManager.pan))
-        view?.addGestureRecognizer(pan)
+        view.addGestureRecognizer(pan)
     }
     
     @objc private func pan(panGesture: UIPanGestureRecognizer) {
-        guard let view = self.view else {
-            return
-        }
         let pointInView = panGesture.location(in: view)
         if panGesture.state == UIGestureRecognizer.State.changed {
             let xDelta = Float((lastPanLocation.x - pointInView.x) / view.bounds.width) * panSensitivity
@@ -199,7 +221,8 @@ extension MetalManager: MTKViewDelegate {
     }
     
     func draw(in view: MTKView) {
-        render(drawable: view.currentDrawable)
+        guard let drawable = view.currentDrawable else { return }
+        render(drawable: drawable)
     }
     
 }

@@ -16,13 +16,10 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
-        guard let view = view as? MTKView, let device = MTLCreateSystemDefaultDevice() else {
+        guard let view = view as? MTKView else {
             return
         }
-        metalManager = MetalManager(device: device)
-        metalManager?.view = view
-        metalManager?.createRenderPipeLine()
-        metalManager?.createCommandQueue()
+        metalManager = MetalManager.buildMetalManager(view: view)
         metalManager?.createNode()
         
     }
