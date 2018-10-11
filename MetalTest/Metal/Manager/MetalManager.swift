@@ -77,16 +77,19 @@ class MetalManager: NSObject {
         guard let commandQueue = commandQueue else {
             return
         }
-        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
-        rotationCube.translate(xDelta: 0.0, yDelta: 0.0, zDelta: -4.0)
-//        rotationCube.movement = { [unowned self] in
-//            rotationCube.rotate(xDelta: -self.panGestYDelta)
-//            rotationCube.rotate(yDelta: -self.panGestXDelta)
-//        }
-        nodeArray.append(rotationCube)
+//        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
+//        rotationCube.translate(xDelta: 0.0, yDelta: 0.0, zDelta: -4.0)
+////        rotationCube.movement = { [unowned self] in
+////            rotationCube.rotate(xDelta: -self.panGestYDelta)
+////            rotationCube.rotate(yDelta: -self.panGestXDelta)
+////        }
+//        nodeArray.append(rotationCube)
         let movementCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
         movementCube.update = {
-            movementCube.rotatetest(yDelta: 0.01)
+            movementCube.pushMatrix()
+            movementCube.rotate(yDelta: 0.01)
+            movementCube.rotate(xDelta: 0.01)
+            movementCube.popMatrix()
         }
         movementCube.movement = { [unowned self] in
             movementCube.translate(zDelta: -self.panGestYDelta)

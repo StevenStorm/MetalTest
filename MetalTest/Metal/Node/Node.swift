@@ -20,7 +20,7 @@ class Node {
     private var texture: MTLTexture?
     private lazy var samplerState: MTLSamplerState? = Node.defaultSampler(device: self.device)
     
-    private var modelMatrix = float4x4()
+    private var matrixStack = Stack()
 //    private var testMatrix = float4x4()
     
     var time:CFTimeInterval = 0.0
@@ -54,7 +54,7 @@ class Node {
         if let samplerState = samplerState {
             renderEncoder.setFragmentSamplerState(samplerState, index: 0)
         }
-        var nodeModelMatrix = modelMatrix
+        var nodeModelMatrix = matrixStack.currentMatrix.modelMatrix()
         nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
         let uniformsBuffer = bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, light: light)
         renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, index: 1)
@@ -95,14 +95,23 @@ extension Node {
 extension Node {
     
     func rotate(xDelta: Float = 0.0, yDelta: Float = 0.0, zDelta: Float = 0.0) {
-        modelMatrix.rotateAroundX(xDelta, y: yDelta, z: zDelta)
+        matrixStack.currentMatrix.model.rotateAroundX(xDelta, y: yDelta, z: zDelta)
     }
     
     func translate(xDelta: Float = 0.0, yDelta: Float = 0.0, zDelta: Float = 0.0) {
-        modelMatrix.translate(xDelta, y: yDelta, z: zDelta)
+        matrixStack.currentMatrix.model.translate(xDelta, y: yDelta, z: zDelta)
     }
     
     func scale(_ scale: Float) {
-        modelMatrix.scale(scale, y: scale, z: scale)
+        matrixStack.currentMatrix.model.scale(scale, y: scale, z: scale)
     }
+    
+    func pushMatrix() {
+        matrixStack.push()
+    }
+    
+    func popMatrix() {
+        matrixStack.pop()
+    }
+    
 }
