@@ -12,14 +12,16 @@ import MetalKit
 class ViewController: UIViewController {
     
     private var metalManager: MetalManager?
+    
     private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.1, direction: (0.0, 0.0, 1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
+    
     private let panSensitivity: Float = 5.0
     private var lastPanLocation: CGPoint!
-    
     private var panGestX: Float = 0.0
     private var panGestY: Float = 0.0
     private var panGestXDelta: Float = 0.0
     private var panGestYDelta: Float = 0.0
+    private let acceleration: Float = 0.03
     
     @IBOutlet var mtkView: MTKView!
     
@@ -27,8 +29,8 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         metalManager = MetalManager.buildMetalManager(view: mtkView)
+        metalManager?.delegate = self
         createNode()
-        
     }
     
     func createNode() {
@@ -48,7 +50,6 @@ class ViewController: UIViewController {
                 rotationCube.rotate(y: rotation)
             }
         }
-        metalManager.addNode(rotationCube)
         let movementCube = Node.buildCube(manager: metalManager, light: light)
         var orbitalRotationY: Float = 0.0
         movementCube.update = {
@@ -66,7 +67,6 @@ class ViewController: UIViewController {
                 }
             }
         }
-        metalManager.addNode(movementCube)
         setupGesture()
     }
     
@@ -82,11 +82,29 @@ class ViewController: UIViewController {
             let yDelta = Float((lastPanLocation.y - pointInView.y) / view.bounds.width) * panSensitivity
             panGestXDelta = xDelta
             panGestYDelta = yDelta
-        } else {
-            panGestXDelta = 0
-            panGestYDelta = 0
         }
         lastPanLocation = pointInView
+    }
+    
+}
+
+extension ViewController: MetalManagerDelegate {
+    
+    func didRenderScene() {
+        if panGestXDelta < -acceleration {
+            panGestXDelta += acceleration
+        } else if panGestXDelta > acceleration {
+            panGestXDelta -= acceleration
+        } else {
+            panGestXDelta = 0.0
+        }
+        if panGestYDelta < -acceleration {
+            panGestYDelta += acceleration
+        } else if panGestYDelta > acceleration {
+            panGestYDelta -= acceleration
+        } else {
+            panGestYDelta = 0.0
+        }
     }
     
 }

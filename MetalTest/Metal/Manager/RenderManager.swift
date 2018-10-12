@@ -10,6 +10,10 @@ import Foundation
 import MetalKit
 import simd
 
+protocol RenderManagerDelegate {
+    func didRenderScene()
+}
+
 class RenderManager {
     
     private var commandQueue: MTLCommandQueue
@@ -19,6 +23,7 @@ class RenderManager {
     private var pipelineState: MTLRenderPipelineState
     private var nodeArray = [Node]()
     private var worldModelMatrix = float4x4()
+    var delegate: RenderManagerDelegate?
     
     static func build(view:MTKView, device: MTLDevice, commandQueue: MTLCommandQueue) -> RenderManager? {
         guard let pipelineState = createPipelineState(view: view, device: device) else { return nil }
@@ -86,12 +91,6 @@ class RenderManager {
         depthTexture = RenderManager.createDepthTextureFromMTKView(drawableSize, on: device) ?? depthTexture
     }
     
-    func runMovementBlock() {
-        nodeArray.forEach { (node) in
-            node.movement?()
-        }
-    }
-    
     func addNode(_ node: Node) {
         nodeArray.append(node)
     }
@@ -115,7 +114,6 @@ class RenderManager {
         renderPassDescriptor.depthAttachment.storeAction = .store
         renderPassDescriptor.depthAttachment.loadAction = .clear
         
-        
         guard let renderEncoder = commandBuffer.makeRenderCommandEncoder(descriptor: renderPassDescriptor) else {
             return
         }
@@ -131,6 +129,7 @@ class RenderManager {
         renderEncoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
+        delegate?.didRenderScene()
     }
     
     func render(node: Node, commandBuffer: MTLCommandBuffer, drawable: CAMetalDrawable, projectionMatrix: float4x4, renderEncoder: MTLRenderCommandEncoder ) {

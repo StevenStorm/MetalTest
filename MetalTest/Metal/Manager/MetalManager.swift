@@ -10,6 +10,10 @@ import UIKit
 import MetalKit
 import simd
 
+protocol MetalManagerDelegate {
+    func didRenderScene()
+}
+
 class MetalManager: NSObject {
     
     private var device: MTLDevice
@@ -22,6 +26,7 @@ class MetalManager: NSObject {
             setView()
         }
     }
+    var delegate: MetalManagerDelegate?
     
     static func buildMetalManager(view:MTKView) -> MetalManager? {
         view.depthStencilPixelFormat = .depth32Float_stencil8
@@ -46,6 +51,7 @@ class MetalManager: NSObject {
         self.renderManager = renderManager
         super.init()
         self.setView()
+        self.renderManager.delegate = self
     }
     
     private func setView() {
@@ -63,12 +69,13 @@ class MetalManager: NSObject {
     }
     
     func createNode(name: String, vertices: [Vertex], textureImage: UIImage?, light: Light) -> Node {
-        
         var texture: MTLTexture? = nil
         if let image = textureImage?.cgImage {
             texture = try! textureLoader.newTexture(cgImage: image, options: [MTKTextureLoader.Option.SRGB:(false as NSNumber)])
         }
-        return Node(name: name, vertices: vertices, texture: texture, device: device, light: light)
+        let node = Node(name: name, vertices: vertices, texture: texture, device: device, light: light)
+        renderManager.addNode(node)
+        return node
     }
     
     func addNode(_ node: Node) {
@@ -86,6 +93,14 @@ extension MetalManager: MTKViewDelegate {
     func draw(in view: MTKView) {
         guard let drawable = view.currentDrawable else { return }
         renderManager.render(drawable: drawable, projectionMatrix: projectionMatrix)
+    }
+    
+}
+
+extension MetalManager: RenderManagerDelegate {
+    
+    func didRenderScene() {
+        delegate?.didRenderScene()
     }
     
 }
