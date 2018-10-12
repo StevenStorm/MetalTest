@@ -76,25 +76,39 @@ class MetalManager: NSObject {
     }
     
     func createNode() {
-//        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
-//        rotationCube.translate(xDelta: 0.0, yDelta: 0.0, zDelta: -4.0)
-////        rotationCube.movement = { [unowned self] in
-////            rotationCube.rotate(xDelta: -self.panGestYDelta)
-////            rotationCube.rotate(yDelta: -self.panGestXDelta)
-////        }
-//        nodeArray.append(rotationCube)
+        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
+        var basicTranslateZ: Float = 0.0
+        var basicTranslateX: Float = 0.0
+        var rotation: Float = 0.0
+        rotationCube.update = {
+            basicTranslateZ -= self.panGestYDelta
+            basicTranslateX -= self.panGestXDelta
+            rotationCube.tranlate(z: basicTranslateZ)
+            rotationCube.tranlate(x: basicTranslateX)
+            rotationCube.scale(scale: 0.1)
+            rotationCube.inSubMatrix {
+                rotation += 0.01
+                rotationCube.rotate(y: rotation)
+            }
+        }
+        renderManager.addNode(rotationCube)
         let movementCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
+        var orbitalRotationY: Float = 0.0
         movementCube.update = {
-            movementCube.pushMatrix()
-            movementCube.rotate(yDelta: 0.01)
-            movementCube.rotate(xDelta: 0.01)
-            movementCube.popMatrix()
+            movementCube.inSubMatrix {
+                basicTranslateZ -= self.panGestYDelta
+                basicTranslateX -= self.panGestXDelta
+                movementCube.tranlate(z: basicTranslateZ)
+                movementCube.tranlate(x: basicTranslateX)
+                movementCube.inSubMatrix {
+                    orbitalRotationY -= 0.01
+                    movementCube.rotate(y: orbitalRotationY)
+                    movementCube.inSubMatrix {
+                        movementCube.tranlate(z: 2.0)
+                    }
+                }
+            }
         }
-        movementCube.movement = { [unowned self] in
-            movementCube.translate(zDelta: -self.panGestYDelta)
-            movementCube.translate(xDelta: -self.panGestXDelta)
-        }
-//        nodeArray.append(movementCube)
         renderManager.addNode(movementCube)
         setupGesture()
     }
@@ -111,7 +125,9 @@ class MetalManager: NSObject {
             let yDelta = Float((lastPanLocation.y - pointInView.y) / view.bounds.width) * panSensitivity
             panGestXDelta = xDelta
             panGestYDelta = yDelta
-            renderManager.runMovementBlock()
+        } else {
+            panGestXDelta = 0
+            panGestYDelta = 0
         }
         lastPanLocation = pointInView
     }

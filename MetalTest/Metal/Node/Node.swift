@@ -21,7 +21,6 @@ class Node {
     private lazy var samplerState: MTLSamplerState? = Node.defaultSampler(device: self.device)
     
     private var matrixStack = Stack()
-//    private var testMatrix = float4x4()
     
     var time:CFTimeInterval = 0.0
     let light: Light
@@ -43,7 +42,7 @@ class Node {
         vertexCount = vertices.count
         self.texture = texture
         
-        let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 2 + Light.size()
+        let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 3 + Light.size()
         bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeOfUniformsBuffer)
         self.light = light
     }
@@ -57,10 +56,12 @@ class Node {
         }
         var nodeModelMatrix = matrixStack.currentMatrix.modelMatrix()
         nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
-        let uniformsBuffer = bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, light: light)
+        let normalMatrix = simd_transpose(simd_inverse(nodeModelMatrix))
+        let uniformsBuffer = bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, normalMatrix: normalMatrix, light: light)
         renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, index: 1)
         renderEncoder.setFragmentBuffer(uniformsBuffer, offset: 0, index: 1)
         renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: vertexCount/3)
+        resetMatrixStock()
     }
     
     func updateDelta(delta: CFTimeInterval) {
@@ -91,28 +92,30 @@ extension Node {
     
 }
 
-//Mark: movement:
+//Mark: matrix:
 
 extension Node {
     
-    func rotate(xDelta: Float = 0.0, yDelta: Float = 0.0, zDelta: Float = 0.0) {
-        matrixStack.currentMatrix.model.rotateAroundX(xDelta, y: yDelta, z: zDelta)
+    private func resetMatrixStock() {
+        matrixStack = Stack()
     }
     
-    func translate(xDelta: Float = 0.0, yDelta: Float = 0.0, zDelta: Float = 0.0) {
-        matrixStack.currentMatrix.model.translate(xDelta, y: yDelta, z: zDelta)
+    func tranlate(x: Float = 0.0, y: Float = 0.0, z: Float = 0.0) {
+        matrixStack.currentMatrix.model.translate(x, y: y, z: z)
     }
     
-    func scale(_ scale: Float) {
+    func rotate(x: Float = 0.0, y: Float = 0.0, z: Float = 0.0) {
+        matrixStack.currentMatrix.model.rotateAroundX(x, y: y, z: z)
+    }
+    
+    func scale(scale: Float = 1.0) {
         matrixStack.currentMatrix.model.scale(scale, y: scale, z: scale)
     }
     
-    func pushMatrix() {
-        matrixStack.push()
-    }
-    
-    func popMatrix() {
-        matrixStack.pop()
+    func inSubMatrix(block: ()->()) {
+        matrixStack.inSubMatrix {
+            block()
+        }
     }
     
 }

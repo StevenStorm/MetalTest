@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		CC28233E216E59D7000D841D /* Matrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28233D216E59D6000D841D /* Matrix.swift */; };
+		CC28233E216E59D7000D841D /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC28233D216E59D6000D841D /* Stack.swift */; };
 		CC3570802154F505009EDC05 /* float4x4+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC35707F2154F505009EDC05 /* float4x4+Extensions.swift */; };
 		CC35708321551E27009EDC05 /* CustomMetalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC35708221551E27009EDC05 /* CustomMetalView.swift */; };
 		CC8E06E02153819C0078FFC6 /* Light.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC8E06DF2153819C0078FFC6 /* Light.swift */; };
@@ -27,7 +27,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		CC28233D216E59D6000D841D /* Matrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Matrix.swift; sourceTree = "<group>"; };
+		CC28233D216E59D6000D841D /* Stack.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		CC35707F2154F505009EDC05 /* float4x4+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "float4x4+Extensions.swift"; sourceTree = "<group>"; };
 		CC35708221551E27009EDC05 /* CustomMetalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomMetalView.swift; sourceTree = "<group>"; };
 		CC8E06DF2153819C0078FFC6 /* Light.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Light.swift; sourceTree = "<group>"; };
@@ -151,7 +151,7 @@
 				CC91A0B421512B340091874D /* Node.swift */,
 				CC91A0B721512E5D0091874D /* Triangle.swift */,
 				CC91A0B9215134980091874D /* Cube.swift */,
-				CC28233D216E59D6000D841D /* Matrix.swift */,
+				CC28233D216E59D6000D841D /* Stack.swift */,
 			);
 			path = Node;
 			sourceTree = "<group>";
@@ -234,7 +234,7 @@
 				CC91A0AE21510FEA0091874D /* MetalManager.swift in Sources */,
 				CCD3C3D521523ECD00206BB0 /* BufferProvider.swift in Sources */,
 				CC8E06E02153819C0078FFC6 /* Light.swift in Sources */,
-				CC28233E216E59D7000D841D /* Matrix.swift in Sources */,
+				CC28233E216E59D7000D841D /* Stack.swift in Sources */,
 				CCB6ED55216F406B00057A00 /* RenderManager.swift in Sources */,
 				CC91A0B521512B340091874D /* Node.swift in Sources */,
 				CC8E06E3215382D50078FFC6 /* Vertex.swift in Sources */,

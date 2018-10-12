@@ -27,19 +27,29 @@ class Matrix {
 }
 
 class Stack {
-    var currentMatrix = Matrix()
-    private var matrices = [Matrix()]
+    let mainMatrix = Matrix()
+    var currentMatrix: Matrix
     
-    func push() {
+    init() {
+        currentMatrix = mainMatrix
+    }
+    
+    private func push() {
         let newMatrix = Matrix()
         newMatrix.owner = currentMatrix
         currentMatrix.matrices.append(newMatrix)
         currentMatrix = newMatrix
     }
     
-    func pop() {
+    private func pop() {
         guard let current = currentMatrix.owner else { return }
         currentMatrix = current
+    }
+    
+    func inSubMatrix(block: ()->()) {
+        push()
+        block()
+        pop()
     }
     
 }
