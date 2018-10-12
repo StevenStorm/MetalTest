@@ -9,9 +9,8 @@
 import Foundation
 import MetalKit
 
-class Cube: Node {
-    
-    init(device: MTLDevice, commandQ: MTLCommandQueue, textureLoader: MTKTextureLoader, light: Light){
+extension Node {
+    static func buildCube(manager:MetalManager, light: Light) -> Node{
         
         //Front
         let A = Vertex(x: -1.0, y:   1.0, z:   1.0, r:  1.0, g:  1.0, b:  1.0, a:  1.0, s: 0.25, t: 0.25, nX: 0.0, nY: 0.0, nZ: 1.0)
@@ -57,12 +56,8 @@ class Cube: Node {
             Q,R,S ,Q,S,T,   //Bot
             U,V,W ,U,W,X    //Back
         ]
-        var texture: MTLTexture? = nil
-        if let image = UIImage(named: "cube")?.cgImage {
-            texture = try! textureLoader.newTexture(cgImage: image, options: [MTKTextureLoader.Option.SRGB:(false as NSNumber)])
-        }
         
-        super.init(name: "Cube", vertices: verticesArray, texture: texture, device: device, light: light)
+        return manager.createNode(name: "Cube", vertices: verticesArray, textureImage: UIImage(named: "cube"), light: light)
+        
     }
-    
 }

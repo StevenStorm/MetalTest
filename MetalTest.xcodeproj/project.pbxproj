@@ -20,7 +20,6 @@
 		CC91A0AE21510FEA0091874D /* MetalManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0AD21510FEA0091874D /* MetalManager.swift */; };
 		CC91A0B1215116DC0091874D /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B0215116DC0091874D /* Shaders.metal */; };
 		CC91A0B521512B340091874D /* Node.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B421512B340091874D /* Node.swift */; };
-		CC91A0B821512E5D0091874D /* Triangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B721512E5D0091874D /* Triangle.swift */; };
 		CC91A0BA215134980091874D /* Cube.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC91A0B9215134980091874D /* Cube.swift */; };
 		CCB6ED55216F406B00057A00 /* RenderManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCB6ED54216F406B00057A00 /* RenderManager.swift */; };
 		CCD3C3D521523ECD00206BB0 /* BufferProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD3C3D421523ECD00206BB0 /* BufferProvider.swift */; };
@@ -42,7 +41,6 @@
 		CC91A0AD21510FEA0091874D /* MetalManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetalManager.swift; sourceTree = "<group>"; };
 		CC91A0B0215116DC0091874D /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		CC91A0B421512B340091874D /* Node.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Node.swift; sourceTree = "<group>"; };
-		CC91A0B721512E5D0091874D /* Triangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Triangle.swift; sourceTree = "<group>"; };
 		CC91A0B9215134980091874D /* Cube.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cube.swift; sourceTree = "<group>"; };
 		CCB6ED54216F406B00057A00 /* RenderManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenderManager.swift; sourceTree = "<group>"; };
 		CCD3C3D421523ECD00206BB0 /* BufferProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BufferProvider.swift; sourceTree = "<group>"; };
@@ -149,7 +147,6 @@
 			isa = PBXGroup;
 			children = (
 				CC91A0B421512B340091874D /* Node.swift */,
-				CC91A0B721512E5D0091874D /* Triangle.swift */,
 				CC91A0B9215134980091874D /* Cube.swift */,
 				CC28233D216E59D6000D841D /* Stack.swift */,
 			);
@@ -240,7 +237,6 @@
 				CC8E06E3215382D50078FFC6 /* Vertex.swift in Sources */,
 				CC91A0BA215134980091874D /* Cube.swift in Sources */,
 				CC91A09D21510EA90091874D /* ViewController.swift in Sources */,
-				CC91A0B821512E5D0091874D /* Triangle.swift in Sources */,
 				CC91A09B21510EA90091874D /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

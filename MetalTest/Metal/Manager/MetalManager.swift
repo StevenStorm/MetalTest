@@ -15,21 +15,8 @@ class MetalManager: NSObject {
     private var device: MTLDevice
     private var commandQueue: MTLCommandQueue
     private var projectionMatrix = float4x4()
-    
-    private let panSensitivity: Float = 5.0
-    private var lastPanLocation: CGPoint!
-    
-    private var panGestX: Float = 0.0
-    private var panGestY: Float = 0.0
-    private var panGestXDelta: Float = 0.0
-    private var panGestYDelta: Float = 0.0
-    
     private var renderManager: RenderManager
-    
-    private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.1, direction: (0.0, 0.0, 1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
-    
     private var textureLoader: MTKTextureLoader
-    
     weak var view: MTKView! {
         didSet {
             setView()
@@ -75,61 +62,17 @@ class MetalManager: NSObject {
         projectionMatrix = float4x4.makePerspectiveViewAngle(float4x4.degrees(toRad: 85), aspectRatio: Float(view.bounds.width/view.bounds.height), nearZ: 0.01, farZ: 100.0)
     }
     
-    func createNode() {
-        let rotationCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
-        var basicTranslateZ: Float = 0.0
-        var basicTranslateX: Float = 0.0
-        var rotation: Float = 0.0
-        rotationCube.update = {
-            basicTranslateZ -= self.panGestYDelta
-            basicTranslateX -= self.panGestXDelta
-            rotationCube.tranlate(z: basicTranslateZ)
-            rotationCube.tranlate(x: basicTranslateX)
-            rotationCube.scale(scale: 0.1)
-            rotationCube.inSubMatrix {
-                rotation += 0.01
-                rotationCube.rotate(y: rotation)
-            }
+    func createNode(name: String, vertices: [Vertex], textureImage: UIImage?, light: Light) -> Node {
+        
+        var texture: MTLTexture? = nil
+        if let image = textureImage?.cgImage {
+            texture = try! textureLoader.newTexture(cgImage: image, options: [MTKTextureLoader.Option.SRGB:(false as NSNumber)])
         }
-        renderManager.addNode(rotationCube)
-        let movementCube = Cube(device: device, commandQ: commandQueue, textureLoader: textureLoader, light: light)
-        var orbitalRotationY: Float = 0.0
-        movementCube.update = {
-            movementCube.inSubMatrix {
-                basicTranslateZ -= self.panGestYDelta
-                basicTranslateX -= self.panGestXDelta
-                movementCube.tranlate(z: basicTranslateZ)
-                movementCube.tranlate(x: basicTranslateX)
-                movementCube.inSubMatrix {
-                    orbitalRotationY -= 0.01
-                    movementCube.rotate(y: orbitalRotationY)
-                    movementCube.inSubMatrix {
-                        movementCube.tranlate(z: 2.0)
-                    }
-                }
-            }
-        }
-        renderManager.addNode(movementCube)
-        setupGesture()
+        return Node(name: name, vertices: vertices, texture: texture, device: device, light: light)
     }
     
-    private func setupGesture() {
-        let pan = UIPanGestureRecognizer(target: self, action: #selector(MetalManager.pan))
-        view.addGestureRecognizer(pan)
-    }
-    
-    @objc private func pan(panGesture: UIPanGestureRecognizer) {
-        let pointInView = panGesture.location(in: view)
-        if panGesture.state == UIGestureRecognizer.State.changed {
-            let xDelta = Float((lastPanLocation.x - pointInView.x) / view.bounds.width) * panSensitivity
-            let yDelta = Float((lastPanLocation.y - pointInView.y) / view.bounds.width) * panSensitivity
-            panGestXDelta = xDelta
-            panGestYDelta = yDelta
-        } else {
-            panGestXDelta = 0
-            panGestYDelta = 0
-        }
-        lastPanLocation = pointInView
+    func addNode(_ node: Node) {
+        renderManager.addNode(node)
     }
     
 }
