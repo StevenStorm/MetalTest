@@ -12,61 +12,33 @@ import simd
 
 class Node {
     
-    private let device: MTLDevice
-    private let name: String
-    private var vertexCount: Int
-    private var vertexBuffer: MTLBuffer?
-    private var bufferProvider: BufferProvider
-    private var texture: MTLTexture?
-    private lazy var samplerState: MTLSamplerState? = Node.defaultSampler(device: self.device)
+    let name: String
+    var vertexCount: Int
+    var vertexBuffer: MTLBuffer?
+    var bufferProvider: BufferProvider
+    var texture: MTLTexture?
+    var samplerState: MTLSamplerState?
     
-    private var matrixStack = Stack()
+    var matrixStack = Stack()
     
-    var time:CFTimeInterval = 0.0
     let light: Light
     
     var update:(()->())?
-    var movement:(()->())?
     
     init(name: String, vertices: [Vertex], texture: MTLTexture?, device: MTLDevice, light: Light) {
         var vertextData = [Vertex]()
         for vertex in vertices {
             vertextData.append(vertex)
         }
-        
         let dataSize = vertextData.count * MemoryLayout.size(ofValue: vertextData[0])
         vertexBuffer = device.makeBuffer(bytes: vertextData, length: dataSize, options: [])
-        
         self.name = name
-        self.device = device
         vertexCount = vertices.count
         self.texture = texture
-        
         let sizeOfUniformsBuffer = MemoryLayout<Float>.size * float4x4.numberOfElements() * 3 + Light.size()
         bufferProvider = BufferProvider(device: device, inflightBuffersCount: 3, sizeOfUniformsBuffer: sizeOfUniformsBuffer)
         self.light = light
-    }
-    
-    func render(commandBuffer: MTLCommandBuffer, pipelineState: MTLRenderPipelineState, drawable: CAMetalDrawable, parentModelViewMatrix: float4x4, projectionMatrix: float4x4, renderEncoder: MTLRenderCommandEncoder ) {
-        
-        renderEncoder.setVertexBuffer(vertexBuffer, offset: 0, index: 0)
-        renderEncoder.setFragmentTexture(texture, index: 0)
-        if let samplerState = samplerState {
-            renderEncoder.setFragmentSamplerState(samplerState, index: 0)
-        }
-        var nodeModelMatrix = matrixStack.currentMatrix.modelMatrix()
-        nodeModelMatrix.multiplyLeft(parentModelViewMatrix)
-        let normalMatrix = simd_transpose(simd_inverse(nodeModelMatrix))
-        let uniformsBuffer = bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, normalMatrix: normalMatrix, light: light)
-        renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, index: 1)
-        renderEncoder.setFragmentBuffer(uniformsBuffer, offset: 0, index: 1)
-        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: vertexCount, instanceCount: vertexCount/3)
-        resetMatrixStock()
-    }
-    
-    func updateDelta(delta: CFTimeInterval) {
-        time += delta
-        update?()
+        samplerState = Node.defaultSampler(device: device)
     }
     
 }
@@ -96,7 +68,7 @@ extension Node {
 
 extension Node {
     
-    private func resetMatrixStock() {
+    func resetMatrixStock() {
         matrixStack = Stack()
     }
     

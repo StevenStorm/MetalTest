@@ -125,12 +125,31 @@ class RenderManager {
         
         nodeArray.forEach { (node) in
             node.update?()
-            node.render(commandBuffer: commandBuffer, pipelineState: pipelineState, drawable: drawable, parentModelViewMatrix: worldModelMatrix, projectionMatrix: projectionMatrix, renderEncoder: renderEncoder)
+            render(node: node, commandBuffer: commandBuffer, drawable: drawable, projectionMatrix: projectionMatrix, renderEncoder: renderEncoder)
         }
         
         renderEncoder.endEncoding()
         commandBuffer.present(drawable)
         commandBuffer.commit()
     }
+    
+    func render(node: Node, commandBuffer: MTLCommandBuffer, drawable: CAMetalDrawable, projectionMatrix: float4x4, renderEncoder: MTLRenderCommandEncoder ) {
+        
+        renderEncoder.setVertexBuffer(node.vertexBuffer, offset: 0, index: 0)
+        renderEncoder.setFragmentTexture(node.texture, index: 0)
+        if let samplerState = node.samplerState {
+            renderEncoder.setFragmentSamplerState(samplerState, index: 0)
+        }
+        var nodeModelMatrix = node.matrixStack.currentMatrix.modelMatrix()
+        nodeModelMatrix.multiplyLeft(worldModelMatrix)
+        let normalMatrix = simd_transpose(simd_inverse(nodeModelMatrix))
+        let uniformsBuffer = node.bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, normalMatrix: normalMatrix, light: node.light)
+        renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, index: 1)
+        renderEncoder.setFragmentBuffer(uniformsBuffer, offset: 0, index: 1)
+        renderEncoder.drawPrimitives(type: .triangle, vertexStart: 0, vertexCount: node.vertexCount, instanceCount: node.vertexCount/3)
+        node.resetMatrixStock()
+    }
+    
+    
     
 }
