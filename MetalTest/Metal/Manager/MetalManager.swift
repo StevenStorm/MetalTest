@@ -65,7 +65,7 @@ class MetalManager: NSObject {
     }
     
     private func setupProjectionMatrix() {
-        projectionMatrix = float4x4.makePerspectiveViewAngle(float4x4.degrees(toRad: 85), aspectRatio: Float(view.bounds.width/view.bounds.height), nearZ: 0.01, farZ: 100.0)
+        projectionMatrix = float4x4.makePerspectiveViewAngle(float4x4.degrees(toRad:85), aspectRatio: Float(view.bounds.width/view.bounds.height), nearZ: 0.01, farZ: 100.0)
     }
     
     func createNode(name: String, vertices: [Vertex], textureImage: UIImage?, light: Light) -> Node {

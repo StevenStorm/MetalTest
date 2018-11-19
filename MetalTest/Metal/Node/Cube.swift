@@ -10,6 +10,11 @@ import Foundation
 import MetalKit
 
 extension Node {
+    
+    static func buildSquare(manager:MetalManager, light: Light) {
+        
+    }
+    
     static func buildCube(manager:MetalManager, light: Light) -> Node{
         
         //Front

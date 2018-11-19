@@ -8,12 +8,14 @@
 
 import UIKit
 import MetalKit
+import simd
 
 class ViewController: UIViewController {
     
     private var metalManager: MetalManager?
     
-    private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.1, direction: (0.0, 0.0, 1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
+//    private var light = Light(color: (1.0,1.0,1.0), ambientIntensity: 0.5, direction: (1.0, 1.0, -1.0), diffuseIntensity: 0.8, shininess: 10, specularIntensity: 2)
+    private var light = Light(color: float3(1.0,1.0,1.0), ambientIntensity: 0.2, position: float4(0.0,0.0,0.0,1.0), direction: float3(1.0,1.0,1.0), diffuseIntensity: 1.0, shininess: 10, specularIntensity: 1)
     
     private let panSensitivity: Float = 5.0
     private var lastPanLocation: CGPoint!
@@ -44,10 +46,10 @@ class ViewController: UIViewController {
             basicTranslateX -= self.panGestXDelta
             rotationCube.tranlate(z: basicTranslateZ)
             rotationCube.tranlate(x: basicTranslateX)
-            rotationCube.scale(scale: 0.1)
+            rotationCube.scale(scale: 0.5)
             rotationCube.inSubMatrix {
                 rotation += 0.01
-                rotationCube.rotate(y: rotation)
+                rotationCube.rotate(x: rotation)
             }
         }
         let movementCube = Node.buildCube(manager: metalManager, light: light)

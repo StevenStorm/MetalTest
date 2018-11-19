@@ -73,7 +73,7 @@ class RenderManager {
         return worldModelMatrix
     }
     
-    private init(commandQueue: MTLCommandQueue,
+    private init?(commandQueue: MTLCommandQueue,
          bufferProvider: BufferProvider,
          pipelineState: MTLRenderPipelineState,
          depthTexture: MTLTexture,
@@ -141,6 +141,7 @@ class RenderManager {
         }
         var nodeModelMatrix = node.matrixStack.currentMatrix.modelMatrix()
         nodeModelMatrix.multiplyLeft(worldModelMatrix)
+        node.light.worldMatrix = worldModelMatrix
         let normalMatrix = simd_transpose(simd_inverse(nodeModelMatrix))
         let uniformsBuffer = node.bufferProvider.nextUniformsBuffer(projectionMatrix: projectionMatrix, modelViewMatrix: nodeModelMatrix, normalMatrix: normalMatrix, light: node.light)
         renderEncoder.setVertexBuffer(uniformsBuffer, offset: 0, index: 1)

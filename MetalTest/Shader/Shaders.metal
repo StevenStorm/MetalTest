@@ -27,6 +27,7 @@ struct VertexOut{
 struct Light{
     packed_float3 color;
     float ambientIntensity;
+    packed_float4 position;
     packed_float3 direction;
     float diffuseIntensity;
     float shininess;
@@ -67,6 +68,7 @@ fragment float4 basic_fragment(VertexOut interpolated [[stage_in]],
                                sampler sampler2D [[sampler(0)]]) {
     Light light = uniforms.light;
     float3 normal = normalize(interpolated.normal);
+//    float3 direction = normalize(light.position.xyz - interpolated.position.xyz);
     
     float4 ambientColor = float4(light.color * light.ambientIntensity, 1);
     
@@ -80,4 +82,7 @@ fragment float4 basic_fragment(VertexOut interpolated [[stage_in]],
     
     float4 color = interpolated.color * tex2D.sample(sampler2D, interpolated.texCoord);
     return color * (ambientColor + diffuseColor + specularColor);
+    
+//    return color * (ambientColor + diffuseColor);
+//    return color;
 }

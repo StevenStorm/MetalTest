@@ -21,7 +21,7 @@ class Node {
     
     var matrixStack = Stack()
     
-    let light: Light
+    var light: Light
     
     var update:(()->())?
     
