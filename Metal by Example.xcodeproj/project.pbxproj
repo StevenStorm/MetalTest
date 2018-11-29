@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		CC05E3A721B0246E00F1598A /* SkyboxShaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = CC05E3A621B0246E00F1598A /* SkyboxShaders.metal */; };
 		CC15B81221A59DD200B0B421 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC15B81121A59DD200B0B421 /* AppDelegate.swift */; };
 		CC15B81421A59DD200B0B421 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC15B81321A59DD200B0B421 /* ViewController.swift */; };
 		CC15B81721A59DD200B0B421 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = CC15B81521A59DD200B0B421 /* Main.storyboard */; };
@@ -22,6 +23,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		CC05E3A521B023A400F1598A /* Shaders.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Shaders.h; sourceTree = "<group>"; };
+		CC05E3A621B0246E00F1598A /* SkyboxShaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = SkyboxShaders.metal; sourceTree = "<group>"; };
 		CC15B80E21A59DD200B0B421 /* Metal by Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Metal by Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC15B81121A59DD200B0B421 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		CC15B81321A59DD200B0B421 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -112,7 +115,9 @@
 		CC6815FD21AEF01F0027FF4C /* Shader */ = {
 			isa = PBXGroup;
 			children = (
+				CC05E3A521B023A400F1598A /* Shaders.h */,
 				CC15B82B21A5AE2B00B0B421 /* Shaders.metal */,
+				CC05E3A621B0246E00F1598A /* SkyboxShaders.metal */,
 			);
 			path = Shader;
 			sourceTree = "<group>";
@@ -196,6 +201,7 @@
 				CC65926421AC1965007462CA /* Scene.swift in Sources */,
 				CC15B81221A59DD200B0B421 /* AppDelegate.swift in Sources */,
 				CC15B82421A5A4E900B0B421 /* Renderer.swift in Sources */,
+				CC05E3A721B0246E00F1598A /* SkyboxShaders.metal in Sources */,
 				CC15B82E21A5BBED00B0B421 /* MathUtilities.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
