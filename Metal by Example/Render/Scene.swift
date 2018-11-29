@@ -63,12 +63,16 @@ class Node {
         return Optional.none
     }
     
+    
 }
 
 class Scene {
     var rootNode = Node(name: "Root")
     var ambientLightColor = float3(0,0,0)
-    var lights = [Light]()
+    var light0 = Light()
+    var light1 = Light()
+    var light2 = Light()
+    var skyMap = Node(name:"Skymap")
     
     func nodeName(_ name: String) -> Node? {
         if rootNode.name == name {
@@ -77,5 +81,22 @@ class Scene {
             return rootNode.nodeNameRecursive(name)
         }
     }
+    
+    func setSkyMap(device: MTLDevice) {
+        let bufferAllocator = MTKMeshBufferAllocator(device: device)
+        let sphereMDLMesh = MDLMesh.newEllipsoid(withRadii: float3(150,150,150),
+                                                   radialSegments: 20,
+                                                   verticalSegments: 20,
+                                                   geometryType: .triangles,
+                                                   inwardNormals: false,
+                                                   hemisphere: false,
+                                                   allocator: bufferAllocator)
+        do {
+            skyMap.model.mesh = try MTKMesh(mesh: sphereMDLMesh, device: device)
+        } catch {
+            fatalError("Could not extract Meshes from model I/O: \(error)")
+        }
+    }
+    
 }
 

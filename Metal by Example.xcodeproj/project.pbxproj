@@ -68,21 +68,53 @@
 		CC15B81021A59DD200B0B421 /* Metal by Example */ = {
 			isa = PBXGroup;
 			children = (
-				CC15B82B21A5AE2B00B0B421 /* Shaders.metal */,
-				CC15B82621A5A75C00B0B421 /* blub.obj */,
-				CC15B82521A5A75C00B0B421 /* bob.obj */,
-				CC15B82721A5A75C00B0B421 /* teapot.obj */,
+				CC6815FD21AEF01F0027FF4C /* Shader */,
+				CC6815FB21AEF0090027FF4C /* Resources */,
+				CC6815FA21AEEFF80027FF4C /* Render */,
 				CC15B81121A59DD200B0B421 /* AppDelegate.swift */,
 				CC15B81321A59DD200B0B421 /* ViewController.swift */,
 				CC15B81521A59DD200B0B421 /* Main.storyboard */,
 				CC15B81821A59DD400B0B421 /* Assets.xcassets */,
 				CC15B81A21A59DD400B0B421 /* LaunchScreen.storyboard */,
 				CC15B81D21A59DD400B0B421 /* Info.plist */,
-				CC15B82321A5A4E800B0B421 /* Renderer.swift */,
-				CC15B82D21A5BBED00B0B421 /* MathUtilities.swift */,
-				CC65926321AC1965007462CA /* Scene.swift */,
 			);
 			path = "Metal by Example";
+			sourceTree = "<group>";
+		};
+		CC6815FA21AEEFF80027FF4C /* Render */ = {
+			isa = PBXGroup;
+			children = (
+				CC15B82D21A5BBED00B0B421 /* MathUtilities.swift */,
+				CC65926321AC1965007462CA /* Scene.swift */,
+				CC15B82321A5A4E800B0B421 /* Renderer.swift */,
+			);
+			path = Render;
+			sourceTree = "<group>";
+		};
+		CC6815FB21AEF0090027FF4C /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CC6815FC21AEF0100027FF4C /* Model */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		CC6815FC21AEF0100027FF4C /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				CC15B82621A5A75C00B0B421 /* blub.obj */,
+				CC15B82521A5A75C00B0B421 /* bob.obj */,
+				CC15B82721A5A75C00B0B421 /* teapot.obj */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		CC6815FD21AEF01F0027FF4C /* Shader */ = {
+			isa = PBXGroup;
+			children = (
+				CC15B82B21A5AE2B00B0B421 /* Shaders.metal */,
+			);
+			path = Shader;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
